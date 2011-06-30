@@ -23,12 +23,14 @@ _mktest()
     mkdir $TEST_DIR/A
     mkdir $TEST_DIR/B
     mkdir $TEST_DIR/C
+    mkdir $TEST_DIR/D
+    mkdir $TEST_DIR/E
     echo aligator > $TEST_DIR/A/a.txt
     echo bison > $TEST_DIR/B/b.txt
     echo camel > $TEST_DIR/C/c.txt
 
+    #create non-snapshot dir 
     mkdir -p $TEST_DIR/$TESTDIR
-    $CHATTR -x $TEST_DIR/$TESTDIR || exit 1
 }
 
 _rmtest()
@@ -40,11 +42,11 @@ _rmtest()
 
 _lstest()
 {
-    if [ -z $s ] ; then
+    if [ -z $1 ] ; then
 	echo Files in file system
 	d=$TEST_DIR
     else
-	echo Files in snapshot $s
+	echo Files in snapshot $1
 	d=$TEST_DIR/$s
     fi
     if [ -d $d ] ; then
@@ -55,3 +57,116 @@ _lstest()
 	echo .
     fi
 }
+
+_test()
+{
+    if [ $n = 0 ] ; then
+	_rmtest
+	exit 0
+    fi
+    _mktest
+    echo
+    echo Running snapshot test $n:
+    echo ------------------------
+
+    sleep 1 # A default delay of 1 sec introduced
+    M=1     # A default file size = 1 mb
+
+    F=${M}M
+    cd $TEST_DIR/$TESTDIR > /dev/null
+    NOTRUNC="conv=notrunc"
+    # uncomment the following line to run in-place write tests
+    INPLACE=$NOTRUNC
+    # uncomment the following line to run direct I/O write tests
+    DIRECT="oflag=direct"
+    TRUNCSIZE=4
+    echo Appending $F zeros to $F.1 $DIRECT
+    dd if=/dev/zero bs=1M count=$M of=$F.1 $NOTRUNC oflag=append $DIRECT status=noxfer || exit 1
+    echo Writing $F random data to $n files
+    for i in $( seq 1 $n ) ; do
+       	# 1st rewrite moves existing blocks to snapshot and allocates new blocks
+	fallocate -mrs -l 1M $F.$i 2>/dev/null || \
+	    dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
+       	# subsequent rewrites doesn't move blocks to snapshot
+	fallocate -mrs -l 1M $F.1 2>/dev/null || \
+       	    dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+    done
+    for i in $( seq 1 $n ) ; do
+	md5sum $F.$i || exit 1
+    done > md5list
+    cd - > /dev/null
+    _lstest || exit 1
+    s=$n
+    btrfs subvolume snapshot $TEST_DIR $s || exit 1
+    case $n in
+	1)
+	    echo Create test:
+	    echo ------------
+	    echo 'Cerating d.txt'
+	    echo dodo > $TEST_DIR/D/d.txt
+	    echo 'Creating e.txt'
+	    echo emu > $TEST_DIR/E/e.txt
+	;;
+	2)
+	    echo Write test:
+	    echo -----------
+	    echo 'Writing b.txt (append)'
+	    echo 'barracuda' >> $TEST_DIR/B/b.txt
+	    echo 'Writing c.txt (truncate)'
+	    echo 'crocodile' > $TEST_DIR/C/c.txt
+	;;
+	3)
+	    echo Remove test:
+	    echo ------------
+	    echo "Truncating c.txt (to size $TRUNCSIZE)"
+	    truncate -s $TRUNCSIZE $TEST_DIR/C/c.txt
+	    echo 'Removing d.txt'
+	    rm $TEST_DIR/D/d.txt
+	;;
+	4)
+	    echo Restore test:
+	    echo -------------
+	    f=$( btrfs subvolume list $TEST_DIR | while read a b c d e f g ; do (echo $g) ; done )
+	    echo 'Restoring from snapshot' $f
+	    mount -o defaults,subvol=$f $TEST_DEV /media/$f
+	    rm -rf $TEST_DIR/?
+	    cp -R /media/$f/? $TEST_DIR/
+	    umount $f || exit 1
+	;;
+	esac || exit 1
+    echo .
+    lstest || exit 1
+    lstest $s || exit 1
+    # need to display status of filesystem and its snapshots here		
+}
+
+N=4
+
+#need to handle read-ahead conditions
+
+echo "aaaa"
+for n in $( seq 1 $N ) ; do
+    echo "$n"
+    _test || exit 1
+done
+echo "bbbb"
+_lstest
+for n in $( seq 1 $N ) ; do
+    _lstest $n
+done
+
+#need to skip delay if there is non zero read delay...
+
+sleep 1
+
+if [ $N = 0] ; then
+    umount $TEST_DIR || exit 1
+    fsck $TEST_DEV
+    mount $TEST_DEV $TEST_DIR || exit 1
+else
+    for n in $( seq 1 $N ) ; do
+	$0 fsck $n 2> /dev/null
+    done
+fi
+
+
