@@ -1,0 +1,57 @@
+#!/bin/bash
+
+TESTDIR=test1
+CHATTR=chattr
+
+if [ -z $TEST_DEV ] ; then
+    echo "set TEST_DEV attribute"
+    echo "usage : export TEST_DEV=[device]"
+    exit 1
+fi
+
+if [ -z $TEST_DIR ] ; then
+    echo "set TEST_DIR attribute"
+    echo "usage : export TEST_DIR=[mount-point]"
+    exit 1
+fi
+
+echo "Test Device : $TEST_DEV"
+echo "Test Device Directory : $TEST_DIR"
+
+_mktest()
+{
+    mkdir $TEST_DIR/A
+    mkdir $TEST_DIR/B
+    mkdir $TEST_DIR/C
+    echo aligator > $TEST_DIR/A/a.txt
+    echo bison > $TEST_DIR/B/b.txt
+    echo camel > $TEST_DIR/C/c.txt
+
+    mkdir -p $TEST_DIR/$TESTDIR
+    $CHATTR -x $TEST_DIR/$TESTDIR || exit 1
+}
+
+_rmtest()
+{
+    rm -rf $TEST_DIR/? 2> /dev/null
+    rm -rf $TEST_DIR/$TESTDIR 2> /dev/null
+}
+
+
+_lstest()
+{
+    if [ -z $s ] ; then
+	echo Files in file system
+	d=$TEST_DIR
+    else
+	echo Files in snapshot $s
+	d=$TEST_DIR/$s
+    fi
+    if [ -d $d ] ; then
+	cd $d > /dev/null
+	grep -v xxx ?/*
+# work to be done on checking the md5sum 
+	cd - > /dev/null
+	echo .
+    fi
+}
