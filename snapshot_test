@@ -97,7 +97,7 @@ _test()
     cd - > /dev/null
     _lstest || exit 1
     s=$n
-    btrfs subvolume snapshot $TEST_DIR $s || exit 1
+    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$s || exit 1
     case $n in
 	1)
 	    echo Create test:
@@ -127,6 +127,7 @@ _test()
 	    echo Restore test:
 	    echo -------------
 	    f=$( btrfs subvolume list $TEST_DIR | while read a b c d e f g ; do (echo $g) ; done )
+	    echo "$f"
 	    echo 'Restoring from snapshot' $f
 	    mount -o defaults,subvol=$f $TEST_DEV /media/$f
 	    rm -rf $TEST_DIR/?
@@ -135,8 +136,8 @@ _test()
 	;;
 	esac || exit 1
     echo .
-    lstest || exit 1
-    lstest $s || exit 1
+    _lstest || exit 1
+    _lstest $s || exit 1
     # need to display status of filesystem and its snapshots here		
 }
 
