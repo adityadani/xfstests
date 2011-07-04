@@ -1,22 +1,26 @@
-#!/bin/bash
+##/bin/bash
+#
+# Copyright (c) 2000-2001,2005 Silicon Graphics, Inc.
+# All Rights Reserved.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it would be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write the Free Software Foundation,
+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+#
+# Functions useful for snapshot tests
+#
 
 TESTDIR=test1
-CHATTR=chattr
-
-if [ -z $TEST_DEV ] ; then
-    echo "set TEST_DEV attribute"
-    echo "usage : export TEST_DEV=[device]"
-    exit 1
-fi
-
-if [ -z $TEST_DIR ] ; then
-    echo "set TEST_DIR attribute"
-    echo "usage : export TEST_DIR=[mount-point]"
-    exit 1
-fi
-
-echo "Test Device : $TEST_DEV"
-echo "Test Device Directory : $TEST_DIR"
 
 _mktest()
 {
@@ -52,13 +56,13 @@ _lstest()
     if [ -d $d ] ; then
 	cd $d > /dev/null
 	grep -v xxx ?/*
-# work to be done on checking the md5sum 
+	test -e $TESTDIR/md5list && (cd $TESTDIR ; md5sum -c md5list || exit 1) 
 	cd - > /dev/null
 	echo .
     fi
 }
 
-_test()
+_snapshot_test()
 {
     if [ $n = 0 ] ; then
 	_rmtest
@@ -95,6 +99,9 @@ _test()
     cd - > /dev/null
     _lstest || exit 1
     s=$n
+    echo "----"
+    echo "$s"
+    echo "----"
     btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$s || exit 1
     case $n in
 	1)
@@ -124,13 +131,16 @@ _test()
 	4)
 	    echo Restore test:
 	    echo -------------
-	    f=$( btrfs subvolume list $TEST_DIR | while read a b c d e f g ; do (echo $g) ; done )
-	    echo "$f"
+	    cd $TEST_DIR
+	    f=$(btrfs subvolume list . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
 	    echo 'Restoring from snapshot' $f
-	    mount -o defaults,subvol=$f $TEST_DEV /media/$f
-	    rm -rf $TEST_DIR/?
-	    cp -R /media/$f/? $TEST_DIR/
-	    umount $f || exit 1
+	    #mkdir /media/$f
+	    #mount -t btrfs -o subvol=$f $TEST_DEV /media/$f
+	    #rm -rf $TEST_DIR/?
+	    #cp -R /media/$f/* $TEST_DIR/
+	    #cd -
+	    #rm -r /media/$f
+	    #umount $f || exit 1
 	;;
 	esac || exit 1
     echo .
@@ -138,29 +148,3 @@ _test()
     _lstest $s || exit 1
     # need to display status of filesystem and its snapshots here		
 }
-
-N=4
-
-
-echo "aaaa"
-for n in $( seq 1 $N ) ; do
-    echo "$n"
-    _test || exit 1
-done
-echo "bbbb"
-_lstest
-for n in $( seq 1 $N ) ; do
-    _lstest $n
-done
-
-if [ $N = 0] ; then
-    umount $TEST_DIR || exit 1
-    fsck $TEST_DEV
-    mount $TEST_DEV $TEST_DIR || exit 1
-else
-    for n in $( seq 1 $N ) ; do
-	$0 fsck $n 2> /dev/null
-    done
-fi
-
-
