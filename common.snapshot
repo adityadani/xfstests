@@ -24,11 +24,12 @@ TESTDIR=test1
 
 _mktest()
 {
-    mkdir $TEST_DIR/A
-    mkdir $TEST_DIR/B
-    mkdir $TEST_DIR/C
-    mkdir $TEST_DIR/D
-    mkdir $TEST_DIR/E
+    mkdir $TEST_DIR/A 2>/dev/null
+    mkdir $TEST_DIR/B 2>/dev/null
+    mkdir $TEST_DIR/C 2>/dev/null
+    mkdir $TEST_DIR/D 2>/dev/null
+    mkdir $TEST_DIR/E 2>/dev/null
+
     echo aligator > $TEST_DIR/A/a.txt
     echo bison > $TEST_DIR/B/b.txt
     echo camel > $TEST_DIR/C/c.txt
@@ -51,7 +52,7 @@ _lstest()
 	d=$TEST_DIR
     else
 	echo Files in snapshot $1
-	d=$TEST_DIR/$s
+	d=$TEST_DIR/$1
     fi
     if [ -d $d ] ; then
 	cd $d > /dev/null
@@ -133,14 +134,17 @@ _snapshot_test()
 	    echo -------------
 	    cd $TEST_DIR
 	    f=$(btrfs subvolume list . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
+	    g=`expr $f + 1`
+	    h=`expr $g + 1`
+	    i=`expr $h + 1`
+	    mkdir /media/$f
 	    echo 'Restoring from snapshot' $f
-	    #mkdir /media/$f
-	    #mount -t btrfs -o subvol=$f $TEST_DEV /media/$f
-	    #rm -rf $TEST_DIR/?
-	    #cp -R /media/$f/* $TEST_DIR/
-	    #cd -
-	    #rm -r /media/$f
-	    #umount $f || exit 1
+	    mount -t btrfs -o subvol=$f $TEST_DEV /media/$f
+	    rm -rf `ls . | grep -v --regexp=[$f$g$h$i]`
+	    cp -R /media/$f/? $TEST_DIR/
+	    cd -
+	    umount /media/$f || exit 1
+	    rm -r /media/$f
 	;;
 	esac || exit 1
     echo .
