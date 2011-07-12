@@ -22,6 +22,26 @@
 
 TESTDIR=test1
 
+_stat()
+{
+	echo "Mounted filesystem :"
+	df -h $TEST_DEV 2>/dev/null
+	echo .
+	echo "Snapshots list : "
+	echo "id inode disk-usage mtime filename"
+	echo "---------------------------------------------"
+	for s in $(btrfs subvolume list $TEST_DIR | while read a b c d e f g ; \
+	do (echo $g) ; done) ; do
+	   	echo "My id : $id"
+		( echo "$( du -sh $TEST_DIR/$s ) " ; \
+			echo "$( ls -lih --color=never $TEST_DIR/$s ) " ) | \
+		( read du b ; read ino c d e f g mm dd tt fname h ; \
+			echo $id $ino $du $mm $dd $tt $fname )
+	done 2> /dev/null
+	echo .
+}
+
+
 _mktest()
 {
     mkdir $TEST_DIR/A 2>/dev/null
@@ -59,9 +79,9 @@ _lstest()
 	grep -v xxx ?/*
 	test -e $TESTDIR/md5list && (cd $TESTDIR ; md5sum -c md5list || exit 1) 
 	cd - > /dev/null
-	echo .
     fi
 }
+
 
 _snapshot_test()
 {
@@ -103,7 +123,7 @@ _snapshot_test()
     echo "----"
     echo "$s"
     echo "----"
-    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$s || exit 1
+    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$s  > /dev/null || exit 1
     case $n in
 	1)
 	    echo Create test:
@@ -139,16 +159,16 @@ _snapshot_test()
 	    i=`expr $h + 1`
 	    mkdir /media/$f
 	    echo 'Restoring from snapshot' $f
-	    mount -t btrfs -o subvol=$f $TEST_DEV /media/$f
-	    rm -rf `ls . | grep -v --regexp=[$f$g$h$i]`
-	    cp -R /media/$f/? $TEST_DIR/
-	    cd -
+	    mount -t btrfs -o subvol=$f $TEST_DEV /media/$f 
+	    rm -rf `ls . | grep -v --regexp=[$f$g$h$i]` 
+	    cp -R /media/$f/? $TEST_DIR/ 
+	    cd - > /dev/null
 	    umount /media/$f || exit 1
 	    rm -r /media/$f
 	;;
 	esac || exit 1
-    echo .
     _lstest || exit 1
     _lstest $s || exit 1
+   # _stat
     # need to display status of filesystem and its snapshots here		
 }

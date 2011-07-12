@@ -38,7 +38,7 @@ _cleanup()
 }
 
 # get standard environment, filters and checks
-#. ./common.rc
+. ./common.rc
 . ./common.filter
 . ./common.snapshot
 
@@ -51,9 +51,9 @@ _supported_os IRIX Linux
 N=4
 cd $TEST_DIR
 for s in $(btrfs subvolume list . | while read a b c d e f g ; do (echo $g) done) ; do
-    btrfs subvolume delete $s
+    btrfs subvolume delete $s > /dev/null 
 done
-cd -
+cd - > /dev/null
 for n in $( seq 1 $N ) ; do
     echo "$n"
    _snapshot_test || exit 1
