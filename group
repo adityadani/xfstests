@@ -368,8 +368,5 @@ deprecated
 252 auto quick prealloc
 253 auto quick
 254 auto quick
-<<<<<<< HEAD
-255 256
-=======
 255 auto quick prealloc
->>>>>>> upstream/master
+256 auto quick

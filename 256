@@ -1,7 +1,7 @@
 #! /bin/bash
-# FS QA Test No. 255
+# FS QA Test No. 256
 #
-# Generic Filesystem Snapshot tests.
+# what am I here for?
 #
 #-----------------------------------------------------------------------
 # Copyright (c) 2011 YOUR NAME HERE.  All Rights Reserved.
@@ -21,7 +21,7 @@
 #-----------------------------------------------------------------------
 #
 # creator
-owner=aditya@
+owner=aditya.dani@gmail.com
 
 seq=`basename $0`
 echo "QA output created by $seq"
@@ -72,7 +72,6 @@ done
 #	$0 fsck $n 2> /dev/null
 #    done
 #fi
-
 
 # optional stuff if your test has verbose output to help resolve problems
 #echo
