@@ -22,6 +22,45 @@
 
 TESTDIR=test1
 
+_list_snapshots()
+{
+	case "$FSTYP" in
+  
+	  ext4dev)
+		ls $SNAPDIR/ 2> /dev/null
+	  	;;
+
+	  btrfs)
+	    btrfs subvolume list $1 2> /dev/null
+		;;	
+	esac
+	 	
+}
+
+_delete_all_snapshots()
+{
+	case "$FSTYP" in
+
+	  ext4dev)
+	    for $s in $( _list_snapshots ) ; do
+			ext4dev delete $s 2> /dev/null
+		done
+		for $s in $( _list_snapshots ) ; do
+			ext4dev remove $s 2> /dev/null
+		;;
+
+	  btrfs)
+		cd $TEST_DIR
+		for s in $( _list_snapshots . | while read a b c d e f g ; \
+		do (echo $g) done) ; do
+    	    btrfs subvolume delete $s > /dev/null 
+		done
+		cd - > /dev/null
+		;;
+	esac
+
+}
+
 _stat()
 {
 	echo "Mounted filesystem :"
@@ -30,7 +69,7 @@ _stat()
 	echo "Snapshots list : "
 	echo "id inode disk-usage mtime filename"
 	echo "---------------------------------------------"
-	for s in $(btrfs subvolume list $TEST_DIR | while read a b c d e f g ; \
+	for s in $( _list_snapshots $TEST_DIR | while read a b c d e f g ; \
 	do (echo $g) ; done) ; do
 	   	echo "My id : $id"
 		( echo "$( du -sh $TEST_DIR/$s ) " ; \
@@ -153,7 +192,7 @@ _snapshot_test()
 	    echo Restore test:
 	    echo -------------
 	    cd $TEST_DIR
-	    f=$(btrfs subvolume list . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
+	    f=$( _list_snapshots . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
 	    g=`expr $f + 1`
 	    h=`expr $g + 1`
 	    i=`expr $h + 1`

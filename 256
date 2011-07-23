@@ -48,12 +48,27 @@ _cleanup()
 _supported_fs generic
 _supported_os IRIX Linux
 
+
+if[ $FSTYP = ext4dev ] ; then  
+    
+    if [ -z $SNAPDIR ] ; then
+	# directory inside $FSTYPE filesystem to store snapshot files
+	SNAPDIR=$TEST_DIR/.snapshots
+    fi
+    if [ -z $SNAPMNT ] ; then
+	# directory prefix for snapshot mount points
+	# snaphot mount points will be created as $SNAPMNT<snapshot-name>
+	# default to ZFS snapshot naming convention <filesystem>@<snapshot>
+	SNAPMNT=$TEST_DIR@
+    fi
+fi
+
+    
 N=4
-cd $TEST_DIR
-for s in $(btrfs subvolume list . | while read a b c d e f g ; do (echo $g) done) ; do
-    btrfs subvolume delete $s > /dev/null 
-done
-cd - > /dev/null
+
+_delete_all_snapshots
+# delete all the previously present snapshots
+
 for n in $( seq 1 $N ) ; do
     echo "$n"
    _snapshot_test || exit 1
