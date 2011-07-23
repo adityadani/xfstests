@@ -61,6 +61,21 @@ _delete_all_snapshots()
 
 }
 
+_take_snapshot()
+{
+	case "$FSTYP" in
+
+	  ext4dev)
+	    ext4dev take $1 > /dev/null || exit 1
+		;;
+
+	  btrfs)
+	    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$1  > /dev/null || exit 1
+		;;	
+	esac
+	    
+}
+
 _stat()
 {
 	echo "Mounted filesystem :"
@@ -162,7 +177,7 @@ _snapshot_test()
     echo "----"
     echo "$s"
     echo "----"
-    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$s  > /dev/null || exit 1
+	_take_snapshot $s
     case $n in
 	1)
 	    echo Create test:
