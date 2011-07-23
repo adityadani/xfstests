@@ -49,7 +49,7 @@ _supported_fs generic
 _supported_os IRIX Linux
 
 
-if[ $FSTYP = ext4dev ] ; then  
+if [ $FSTYP = ext4dev ] ; then  
     
     if [ -z $SNAPDIR ] ; then
 	# directory inside $FSTYPE filesystem to store snapshot files

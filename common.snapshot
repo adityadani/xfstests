@@ -47,6 +47,7 @@ _delete_all_snapshots()
 		done
 		for $s in $( _list_snapshots ) ; do
 			ext4dev remove $s 2> /dev/null
+		done
 		;;
 
 	  btrfs)
