@@ -207,19 +207,34 @@ _snapshot_test()
 	4)
 	    echo Restore test:
 	    echo -------------
-	    cd $TEST_DIR
-	    f=$( _list_snapshots . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
-	    g=`expr $f + 1`
-	    h=`expr $g + 1`
-	    i=`expr $h + 1`
-	    mkdir /media/$f
-	    echo 'Restoring from snapshot' $f
-	    mount -t btrfs -o subvol=$f $TEST_DEV /media/$f 
-	    rm -rf `ls . | grep -v --regexp=[$f$g$h$i]` 
-	    cp -R /media/$f/? $TEST_DIR/ 
-	    cd - > /dev/null
-	    umount /media/$f || exit 1
-	    rm -r /media/$f
+		case "$FSTYP" in
+
+		  btrfs)
+		    cd $TEST_DIR
+	    	f=$( _list_snapshots . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
+	   		g=`expr $f + 1`
+	  		h=`expr $g + 1`
+	 	    i=`expr $h + 1`
+		    mkdir /media/$f
+			echo 'Restoring from snapshot' $f
+			mount -t btrfs -o subvol=$f $TEST_DEV /media/$f 
+			rm -rf `ls . | grep -v --regexp=[$f$g$h$i]` 
+	  		cp -R /media/$f/? $TEST_DIR/ 
+	    	cd - > /dev/null
+	    	umount /media/$f || exit 1
+	    	rm -r /media/$f
+			;;
+
+		  ext4dev)
+		    f=$( ls -v $SNAPDIR/ | head -n 1 )
+			echo 'Restoring from snapshot' $f
+			ext4dev mount $f || exit 1
+			rm -rf $TEST_DIR/?
+			cp -R $SNAPMNT$f/? $TEST_DIR/
+			ext4dev umount $f || exit 1
+			;;
+		
+		esac
 	;;
 	esac || exit 1
     _lstest || exit 1
