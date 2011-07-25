@@ -61,13 +61,21 @@ if [ $FSTYP = ext4dev ] ; then
 	# default to ZFS snapshot naming convention <filesystem>@<snapshot>
 	SNAPMNT=$TEST_DIR@
     fi
+else
+	
+	# btrfs snapshots are mounted on $TEST_DIR/$s
+	SNAPMNT=$TEST_DIR/
 fi
 
     
 N=4
 
-_delete_all_snapshots
 # delete all the previously present snapshots
+_delete_all_snapshots
+
+# delete previous test files
+_rmtest
+_mktest
 
 for n in $( seq 1 $N ) ; do
     echo "$n"

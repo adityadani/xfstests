@@ -106,7 +106,8 @@ Writing 1M random data to 3 files
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:crocodile
 D/d.txt:dodo
 E/e.txt:emu
 1M.1: OK
@@ -122,7 +123,8 @@ Removing d.txt
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:came
+B/b.txt:barracuda
+C/c.txt:croc
 E/e.txt:emu
 1M.1: OK
 1M.2: OK
@@ -130,7 +132,8 @@ E/e.txt:emu
 Files in snapshot 3
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:crocodile
 D/d.txt:dodo
 E/e.txt:emu
 1M.1: OK
@@ -163,7 +166,8 @@ Writing 1M random data to 4 files
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:croc
 E/e.txt:emu
 1M.1: OK
 1M.2: OK
@@ -186,7 +190,8 @@ C/c.txt:camel
 Files in snapshot 4
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:croc
 E/e.txt:emu
 1M.1: OK
 1M.2: OK
@@ -216,7 +221,8 @@ E/e.txt:emu
 Files in snapshot 3
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:crocodile
 D/d.txt:dodo
 E/e.txt:emu
 1M.1: OK
@@ -225,7 +231,8 @@ E/e.txt:emu
 Files in snapshot 4
 A/a.txt:aligator
 B/b.txt:bison
-C/c.txt:camel
+B/b.txt:barracuda
+C/c.txt:croc
 E/e.txt:emu
 1M.1: OK
 1M.2: OK

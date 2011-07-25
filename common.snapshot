@@ -42,10 +42,10 @@ _delete_all_snapshots()
 	case "$FSTYP" in
 
 	  ext4dev)
-	    for $s in $( _list_snapshots ) ; do
+	    for s in $( _list_snapshots ) ; do
 			ext4dev delete $s 2> /dev/null
 		done
-		for $s in $( _list_snapshots ) ; do
+		for s in $( _list_snapshots ) ; do
 			ext4dev remove $s 2> /dev/null
 		done
 		;;
@@ -68,6 +68,7 @@ _take_snapshot()
 
 	  ext4dev)
 	    ext4dev take $1 > /dev/null || exit 1
+		ext4dev mount $1 > /dev/null || exit 1
 		;;
 
 	  btrfs)
@@ -124,7 +125,7 @@ _lstest()
 {
     if [ -z $1 ] ; then
 	echo Files in file system
-	d=$TEST_DIR
+	d=$SNAPMNT$1
     else
 	echo Files in snapshot $1
 	d=$TEST_DIR/$1
@@ -140,11 +141,6 @@ _lstest()
 
 _snapshot_test()
 {
-    if [ $n = 0 ] ; then
-	_rmtest
-	exit 0
-    fi
-    _mktest
     echo
     echo Running snapshot test $n:
     echo ------------------------
