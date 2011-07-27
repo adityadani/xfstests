@@ -43,10 +43,10 @@ _delete_all_snapshots()
 
 	  ext4dev)
 	    for s in $( _list_snapshots ) ; do
-			ext4dev delete $s 2> /dev/null
+			snapshot.ext4dev delete $s 2> /dev/null
 		done
 		for s in $( _list_snapshots ) ; do
-			ext4dev remove $s 2> /dev/null
+			snapshot.ext4dev remove $s 2> /dev/null
 		done
 		;;
 
@@ -67,8 +67,8 @@ _take_snapshot()
 	case "$FSTYP" in
 
 	  ext4dev)
-	    ext4dev take $1 > /dev/null || exit 1
-		ext4dev mount $1 > /dev/null || exit 1
+	    snapshot.ext4dev take $1 > /dev/null || exit 1
+		snapshot.ext4dev mount $1 > /dev/null || exit 1
 		;;
 
 	  btrfs)
@@ -224,10 +224,10 @@ _snapshot_test()
 		  ext4dev)
 		    f=$( ls -v $SNAPDIR/ | head -n 1 )
 			echo 'Restoring from snapshot' $f
-			ext4dev mount $f || exit 1
+			snapshot.ext4dev mount $f || exit 1
 			rm -rf $TEST_DIR/?
 			cp -R $SNAPMNT$f/? $TEST_DIR/
-			ext4dev umount $f || exit 1
+			snapshot.ext4dev umount $f || exit 1
 			;;
 		
 		esac
