@@ -49,12 +49,15 @@ _supported_fs generic
 _supported_os IRIX Linux
 
 
+if [ -z $SNAPDIR ] ; then
+# directory inside $FSTYPE filesystem to store
+# snapshot subvolumes/snapshot files
+SNAPDIR=$TEST_DIR/.snapshots
+fi
+
+
 if [ $FSTYP = ext4dev ] ; then  
     
-    if [ -z $SNAPDIR ] ; then
-	# directory inside $FSTYPE filesystem to store snapshot files
-	SNAPDIR=$TEST_DIR/.snapshots
-    fi
     if [ -z $SNAPMNT ] ; then
 	# directory prefix for snapshot mount points
 	# snaphot mount points will be created as $SNAPMNT<snapshot-name>
@@ -62,9 +65,11 @@ if [ $FSTYP = ext4dev ] ; then
 	SNAPMNT=$TEST_DIR@
     fi
 else
-	
-	# btrfs snapshots are mounted on $TEST_DIR/$s
-	SNAPMNT=$TEST_DIR/
+	cd $TEST_DIR
+	mkdir .snapshots
+	cd - > /dev/null
+	# btrfs snapshots are mounted on $TEST_DIR/.snapshots/$s
+	SNAPMNT=$SNAPDIR/
 fi
 
     
@@ -85,16 +90,6 @@ _lstest
 for n in $( seq 1 $N ) ; do
     _lstest $n
 done
-
-#if [ $N = 0] ; then
-#    umount $TEST_DIR || exit 1
-#    fsck $TEST_DEV
-#    mount $TEST_DEV $TEST_DIR || exit 1
-#else
-#    for n in $( seq 1 $N ) ; do
-#	$0 fsck $n 2> /dev/null
-#    done
-#fi
 
 # optional stuff if your test has verbose output to help resolve problems
 #echo

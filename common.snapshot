@@ -31,7 +31,7 @@ _list_snapshots()
 	  	;;
 
 	  btrfs)
-	    btrfs subvolume list $1 2> /dev/null
+	    btrfs subvolume list $SNAPDIR 2> /dev/null
 		;;	
 	esac
 	 	
@@ -51,7 +51,7 @@ _delete_all_snapshots()
 		;;
 
 	  btrfs)
-		cd $TEST_DIR
+		cd $SNAPDIR
 		for s in $( _list_snapshots . | while read a b c d e f g ; \
 		do (echo $g) done) ; do
     	    btrfs subvolume delete $s > /dev/null 
@@ -72,29 +72,10 @@ _take_snapshot()
 		;;
 
 	  btrfs)
-	    btrfs subvolume snapshot $TEST_DIR $TEST_DIR/$1  > /dev/null || exit 1
+	    btrfs subvolume snapshot $TEST_DIR $SNAPDIR/$1  > /dev/null || exit 1
 		;;	
 	esac
 	    
-}
-
-_stat()
-{
-	echo "Mounted filesystem :"
-	df -h $TEST_DEV 2>/dev/null
-	echo .
-	echo "Snapshots list : "
-	echo "id inode disk-usage mtime filename"
-	echo "---------------------------------------------"
-	for s in $( _list_snapshots $TEST_DIR | while read a b c d e f g ; \
-	do (echo $g) ; done) ; do
-	   	echo "My id : $id"
-		( echo "$( du -sh $TEST_DIR/$s ) " ; \
-			echo "$( ls -lih --color=never $TEST_DIR/$s ) " ) | \
-		( read du b ; read ino c d e f g mm dd tt fname h ; \
-			echo $id $ino $du $mm $dd $tt $fname )
-	done 2> /dev/null
-	echo .
 }
 
 
@@ -125,10 +106,10 @@ _lstest()
 {
     if [ -z $1 ] ; then
 	echo Files in file system
-	d=$SNAPMNT$1
+	d=$TEST_DIR
     else
 	echo Files in snapshot $1
-	d=$TEST_DIR/$1
+	d=$SNAPDIR/$1
     fi
     if [ -d $d ] ; then
 	cd $d > /dev/null
@@ -203,38 +184,18 @@ _snapshot_test()
 	4)
 	    echo Restore test:
 	    echo -------------
-		case "$FSTYP" in
-
-		  btrfs)
-		    cd $TEST_DIR
-	    	f=$( _list_snapshots . | head -n 1 | while read a b c d e f g ; do (echo $g) done)
-	   		g=`expr $f + 1`
-	  		h=`expr $g + 1`
-	 	    i=`expr $h + 1`
-		    mkdir /media/$f
-			echo 'Restoring from snapshot' $f
-			mount -t btrfs -o subvol=$f $TEST_DEV /media/$f 
-			rm -rf `ls . | grep -v --regexp=[$f$g$h$i]` 
-	  		cp -R /media/$f/? $TEST_DIR/ 
-	    	cd - > /dev/null
-	    	umount /media/$f || exit 1
-	    	rm -r /media/$f
-			;;
-
-		  ext4dev)
-		    f=$( ls -v $SNAPDIR/ | head -n 1 )
-			echo 'Restoring from snapshot' $f
-			snapshot.ext4dev mount $f || exit 1
-			rm -rf $TEST_DIR/?
-			cp -R $SNAPMNT$f/? $TEST_DIR/
-			snapshot.ext4dev umount $f || exit 1
-			;;
-		
-		esac
+		f=$( ls -v $SNAPDIR/ | head -n 1 )
+		echo 'Restoring from snapshot' $f
+		if [ $FSTYP = ext4dev ] ; then
+		   snapshot.ext4dev mount $f || exit 1
+		fi
+		rm -rf $TEST_DIR/?
+		cp -R $SNAPMNT$f/? $TEST_DIR/
+		if [ $FSTYP = ext4dev ] ; then
+		   snapshot.ext4dev umount $f || exit 1
+		fi			   
 	;;
 	esac || exit 1
     _lstest || exit 1
     _lstest $s || exit 1
-   # _stat
-    # need to display status of filesystem and its snapshots here		
 }
