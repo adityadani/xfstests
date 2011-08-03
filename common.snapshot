@@ -142,8 +142,10 @@ _snapshot_test()
     echo Writing $F random data to $n files
     for i in $( seq 1 $n ) ; do
        	# 1st rewrite moves existing blocks to snapshot and allocates new blocks
-	dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
+		$XFS_IO_PROG -f -F -c "mmap 0 1m" $F.$i
+		dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
        	# subsequent rewrites doesn't move blocks to snapshot
+		$XFS_IO_PROG -f -F -c "mmap 0 1m" $F.1
         dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
     done
     for i in $( seq 1 $n ) ; do
