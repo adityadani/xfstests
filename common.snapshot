@@ -25,14 +25,14 @@ TESTDIR=test1
 _list_snapshots()
 {
 	case "$FSTYP" in
-  
-	  ext4dev)
-		ls $SNAPDIR/ 2> /dev/null
-	  	;;
-
+ 
 	  btrfs)
 	    btrfs subvolume list $SNAPDIR 2> /dev/null
-		;;	
+		;;
+ 
+	  *)
+		ls $SNAPDIR/ 2> /dev/null
+	  	;;	
 	esac
 	 	
 }
@@ -40,15 +40,6 @@ _list_snapshots()
 _delete_all_snapshots()
 {
 	case "$FSTYP" in
-
-	  ext4dev)
-	    for s in $( _list_snapshots ) ; do
-			snapshot.ext4dev delete $s 2> /dev/null
-		done
-		for s in $( _list_snapshots ) ; do
-			snapshot.ext4dev remove $s 2> /dev/null
-		done
-		;;
 
 	  btrfs)
 		cd $SNAPDIR
@@ -58,6 +49,15 @@ _delete_all_snapshots()
 		done
 		cd - > /dev/null
 		;;
+
+	  *)
+	    for s in $( _list_snapshots ) ; do
+			snapshot.$FSTYP delete $s 2> /dev/null
+		done
+		for s in $( _list_snapshots ) ; do
+			snapshot.$FSTYP remove $s 2> /dev/null
+		done
+		;;
 	esac
 
 }
@@ -66,14 +66,14 @@ _take_snapshot()
 {
 	case "$FSTYP" in
 
-	  ext4dev)
-	    snapshot.ext4dev take $1 > /dev/null || exit 1
-		snapshot.ext4dev mount $1 > /dev/null || exit 1
-		;;
-
 	  btrfs)
 	    btrfs subvolume snapshot $TEST_DIR $SNAPDIR/$1  > /dev/null || exit 1
 		;;	
+
+	  *)
+	    snapshot.$FSTYPE take $1 > /dev/null || exit 1
+		snapshot.$FSTYP mount $1 > /dev/null || exit 1
+		;;
 	esac
 	    
 }
@@ -126,7 +126,6 @@ _snapshot_test()
     echo Running snapshot test $n:
     echo ------------------------
 
-    sleep 1 # A default delay of 1 sec introduced
     M=1     # A default file size = 1 mb
 
     F=${M}M
@@ -141,12 +140,20 @@ _snapshot_test()
     dd if=/dev/zero bs=1M count=$M of=$F.1 $NOTRUNC oflag=append $DIRECT status=noxfer || exit 1
     echo Writing $F random data to $n files
     for i in $( seq 1 $n ) ; do
-       	# 1st rewrite moves existing blocks to snapshot and allocates new blocks
-		$XFS_IO_PROG -f -F -c "mmap 0 1m" $F.$i
-		dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
-       	# subsequent rewrites doesn't move blocks to snapshot
-		$XFS_IO_PROG -f -F -c "mmap 0 1m" $F.1
-        dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+		if [ $(($n % 2)) -eq 0 ] ; then
+		   # memmory mapped i/o
+	       # 1st rewrite moves existing blocks to snapshot and allocates new blocks	 
+		   dd if=/dev/zero bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
+		   # subsequent rewrites doesn't move blocks to snapshot
+		   dd if=/dev/zero bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.1
+		else
+			# 1st rewrite moves existing blocks to snapshot and allocates new blocks
+			dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
+       		# subsequent rewrites doesn't move blocks to snapshot
+        	dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+		fi
     done
     for i in $( seq 1 $n ) ; do
 	md5sum $F.$i || exit 1
@@ -188,14 +195,8 @@ _snapshot_test()
 	    echo -------------
 		f=$( ls -v $SNAPDIR/ | head -n 1 )
 		echo 'Restoring from snapshot' $f
-		if [ $FSTYP = ext4dev ] ; then
-		   snapshot.ext4dev mount $f || exit 1
-		fi
 		rm -rf $TEST_DIR/?
 		cp -R $SNAPMNT$f/? $TEST_DIR/
-		if [ $FSTYP = ext4dev ] ; then
-		   snapshot.ext4dev umount $f || exit 1
-		fi			   
 	;;
 	esac || exit 1
     _lstest || exit 1
