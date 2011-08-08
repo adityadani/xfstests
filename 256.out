@@ -6,11 +6,9 @@ Running snapshot test 1:
 Appending 1M zeros to 1M.1 oflag=direct
 1+0 records in
 1+0 records out
-Writing 1M random data to 1 files
 1+0 records in
 1+0 records out
-1+0 records in
-1+0 records out
+Writing 1M random data to 0 files
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
@@ -42,11 +40,9 @@ Running snapshot test 2:
 Appending 1M zeros to 1M.1 oflag=direct
 1+0 records in
 1+0 records out
-Writing 1M random data to 2 files
 1+0 records in
 1+0 records out
-1+0 records in
-1+0 records out
+Writing 1M random data to 1 files
 1+0 records in
 1+0 records out
 1+0 records in
@@ -90,19 +86,9 @@ Running snapshot test 3:
 Appending 1M zeros to 1M.1 oflag=direct
 1+0 records in
 1+0 records out
-Writing 1M random data to 3 files
 1+0 records in
 1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
+Writing 1M random data to 2 files
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
@@ -146,11 +132,9 @@ Running snapshot test 4:
 Appending 1M zeros to 1M.1 oflag=direct
 1+0 records in
 1+0 records out
-Writing 1M random data to 4 files
 1+0 records in
 1+0 records out
-1+0 records in
-1+0 records out
+Writing 1M random data to 3 files
 1+0 records in
 1+0 records out
 1+0 records in

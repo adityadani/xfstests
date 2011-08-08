@@ -138,21 +138,22 @@ _snapshot_test()
     TRUNCSIZE=4
     echo Appending $F zeros to $F.1 $DIRECT
     dd if=/dev/zero bs=1M count=$M of=$F.1 $NOTRUNC oflag=append $DIRECT status=noxfer || exit 1
-    echo Writing $F random data to $n files
-    for i in $( seq 1 $n ) ; do
-		if [ $(($n % 2)) -eq 0 ] ; then
-		   # memmory mapped i/o
-	       # 1st rewrite moves existing blocks to snapshot and allocates new blocks	 
-		   dd if=/dev/zero bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
-		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
-		   # subsequent rewrites doesn't move blocks to snapshot
-		   dd if=/dev/zero bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
-		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.1
+	# create a new file ad write 1M data on it
+	dd if=/dev/urandom bs=1M count=$M of=$F.$n status=noxfer || exit 1
+    echo Writing $F random data to $[ $n - 1 ] files
+    for i in $( seq 1 $[ $n - 1 ] ) ; do
+	    # 1st rewrite moves existing blocks to snapshot and allocates new blocks	 
+		if [ $(($n % 2)) -eq 0 ] ; then  
+           dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE $DIRECT status=noxfer || exit 1
 		else
-			# 1st rewrite moves existing blocks to snapshot and allocates new blocks
-			dd if=/dev/urandom bs=1M count=$M of=$F.$i $INPLACE status=noxfer || exit 1
-       		# subsequent rewrites doesn't move blocks to snapshot
-        	dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
+		fi	
+	    # subsequent rewrites doesn't move blocks to snapshot
+		if [ $(($n % 2)) -eq 0 ] ; then  
+	       # subsequent rewrites doesn't move blocks to snapshot
+           dd if=/dev/urandom bs=1M count=$M of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+		else
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.1
 		fi
     done
     for i in $( seq 1 $n ) ; do
