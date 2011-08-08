@@ -71,7 +71,7 @@ _take_snapshot()
 		;;	
 
 	  *)
-	    snapshot.$FSTYPE take $1 > /dev/null || exit 1
+	    snapshot.$FSTYP take $1 > /dev/null || exit 1
 		snapshot.$FSTYP mount $1 > /dev/null || exit 1
 		;;
 	esac
@@ -109,7 +109,7 @@ _lstest()
 	d=$TEST_DIR
     else
 	echo Files in snapshot $1
-	d=$SNAPDIR/$1
+	d=$SNAPMNT$1
     fi
     if [ -d $d ] ; then
 	cd $d > /dev/null
