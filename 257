@@ -1,7 +1,7 @@
 #! /bin/bash
-# FS QA Test No. 256
+# FS QA Test No. 257
 #
-# File System snapshot tests (small files)
+# File System snapshot tests (large files)
 #
 #-----------------------------------------------------------------------
 # Copyright (c) 2011 YOUR NAME HERE.  All Rights Reserved.
@@ -21,7 +21,7 @@
 #-----------------------------------------------------------------------
 #
 # creator
-owner=aditya.dani@gmail.com
+owner=aditya.dani@gmail.com@
 
 seq=`basename $0`
 echo "QA output created by $seq"
@@ -82,8 +82,8 @@ _delete_all_snapshots
 _rmtest
 _mktest
 
-M=1
-size=${M}M
+G=1
+size=${G}G
 
 for n in $( seq 1 $N ) ; do
     echo "$n"
@@ -100,4 +100,4 @@ done
 
 # success, all done
 status=0
-exit 0
+exit

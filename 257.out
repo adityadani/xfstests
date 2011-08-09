@@ -1,0 +1,225 @@
+QA output created by 257
+1
+
+Running snapshot test 1:
+------------------------
+Appending 1G zeros to 1G.1 oflag=direct
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Writing 1G random data to 0 files
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+1G.1: OK
+----
+1
+----
+Create test:
+------------
+Cerating d.txt
+Creating e.txt
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+Files in snapshot 1
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+1G.1: OK
+2
+
+Running snapshot test 2:
+------------------------
+Appending 1G zeros to 1G.1 oflag=direct
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Writing 1G random data to 1 files
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+----
+2
+----
+Write test:
+-----------
+Writing b.txt (append)
+Writing c.txt (truncate)
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:crocodile
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+Files in snapshot 2
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+3
+
+Running snapshot test 3:
+------------------------
+Appending 1G zeros to 1G.1 oflag=direct
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Writing 1G random data to 2 files
+./common.snapshot: line 145: 18646 Bus error               $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:crocodile
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+----
+3
+----
+Remove test:
+------------
+Truncating c.txt (to size 4)
+Removing d.txt
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:croc
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+Files in snapshot 3
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:crocodile
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+4
+
+Running snapshot test 4:
+------------------------
+Appending 1G zeros to 1G.1 oflag=direct
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Writing 1G random data to 3 files
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:croc
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+1G.4: OK
+----
+4
+----
+Restore test:
+-------------
+Restoring from snapshot 1
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+1G.1: OK
+1G.2: OK
+1G.3: OK
+1G.4: OK
+Files in snapshot 4
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:croc
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+1G.4: OK
+Files in file system
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+1G.1: OK
+1G.2: OK
+1G.3: OK
+1G.4: OK
+Files in snapshot 1
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+1G.1: OK
+Files in snapshot 2
+A/a.txt:aligator
+B/b.txt:bison
+C/c.txt:camel
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+Files in snapshot 3
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:crocodile
+D/d.txt:dodo
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+Files in snapshot 4
+A/a.txt:aligator
+B/b.txt:bison
+B/b.txt:barracuda
+C/c.txt:croc
+E/e.txt:emu
+1G.1: OK
+1G.2: OK
+1G.3: OK
+1G.4: OK
