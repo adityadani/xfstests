@@ -94,6 +94,8 @@ for n in $( seq 1 $N ) ; do
     _lstest $n
 done
 
+_unmount
+
 # optional stuff if your test has verbose output to help resolve problems
 #echo
 #echo "If failure, check $seq.full (this) and $seq.full.ok (reference)"
