@@ -83,11 +83,11 @@ _unmount()
 	case "$FSTYP" in
 
 	     btrfs)
-		btrfs umount $TEST_DIR > /dev/null || exit 1
+			umount $TEST_DIR > /dev/null || exit 1
 		;;
 
 	     *)
-		snapshot.$FSTYP umount $TEST_DIR > /dev/null || exit 1
+			snapshot.$FSTYP umount $TEST_DIR > /dev/null || exit 1
 		;;
 	     esac
 }
