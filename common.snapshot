@@ -119,8 +119,8 @@ _rmtest()
 _lstest()
 {
     if [ -z $1 ] ; then
-	echo Files in file system
-	d=$TEST_DIR
+       echo Files in file system
+       d=$TEST_DIR
     else
 	echo Files in snapshot $1
 	d=$SNAPMNT$1
@@ -140,6 +140,12 @@ _snapshot_test()
     echo Running snapshot test $n:
     echo ------------------------
 
+    if [ $seq -eq 256 ] ; then
+       if_file_random=/dev/urandom
+    else
+       if_file_random=/dev/zero
+    fi
+
 #    M=1     # A default file size = 1 mb
 
 #    F=${M}M
@@ -154,21 +160,21 @@ _snapshot_test()
     echo Appending $F zeros to $F.1 $DIRECT
     dd if=/dev/zero bs=$F count=1 of=$F.1 $NOTRUNC oflag=append $DIRECT status=noxfer || exit 1
 	# create a new file ad write 1M data on it
-	dd if=/dev/urandom bs=1M count=1 of=$F.$n status=noxfer || exit 1
+	dd if=$if_file_random bs=1M count=1 of=$F.$n status=noxfer || exit 1
     echo Writing $F random data to $[ $n - 1 ] files
     for i in $( seq 1 $[ $n - 1 ] ) ; do
 	    # 1st rewrite moves existing blocks to snapshot and allocates new blocks	 
 		if [ $(($n % 2)) -eq 0 ] ; then  
-           dd if=/dev/urandom bs=$F count=1 of=$F.$i $INPLACE $DIRECT status=noxfer || exit 1
+           	   dd if=$if_file_random bs=$F count=1 of=$F.$i $INPLACE $DIRECT status=noxfer || exit 1
 		else
-		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite -S $n 0 $F" $F.$i
 		fi	
 	    # subsequent rewrites doesn't move blocks to snapshot
 		if [ $(($n % 2)) -eq 0 ] ; then  
-	       # subsequent rewrites doesn't move blocks to snapshot
-           dd if=/dev/urandom bs=$F count=1 of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
+	       	   # subsequent rewrites doesn't move blocks to snapshot
+               	   dd if=$if_file_random bs=$F count=1 of=$F.1 $INPLACE $DIRECT status=noxfer || exit 1
 		else
-		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.1
+		   $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite -S $n 0 $F" $F.1
 		fi
     done
     for i in $( seq 1 $n ) ; do
