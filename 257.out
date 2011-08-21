@@ -43,10 +43,6 @@ Appending 1G zeros to 1G.1 oflag=direct
 1+0 records in
 1+0 records out
 Writing 1G random data to 1 files
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
@@ -89,7 +85,14 @@ Appending 1G zeros to 1G.1 oflag=direct
 1+0 records in
 1+0 records out
 Writing 1G random data to 2 files
-./common.snapshot: line 145: 18646 Bus error               $XFS_IO_PROG -f -F -c "mmap 0 $F" -c "mwrite 0 $F" $F.$i
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
+1+0 records in
+1+0 records out
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
@@ -136,18 +139,6 @@ Appending 1G zeros to 1G.1 oflag=direct
 1+0 records in
 1+0 records out
 Writing 1G random data to 3 files
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
-1+0 records in
-1+0 records out
 Files in file system
 A/a.txt:aligator
 B/b.txt:bison
