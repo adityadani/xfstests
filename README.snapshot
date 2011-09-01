@@ -1,0 +1,121 @@
+------------------------------------------------------------------
+
+				Snapshot Test Suite
+				  Tests : 256,257
+
+-----------------------------------------------------------------
+
+This is a test suite to test the advanced feature snapshot of file systems
+like btrfs. Currently the xfs test suite is used to validate the base
+functionality of btrfs. The same has been extended to test btrfs-specific 
+functions like snapshot creation/deletion, balancing and relocation.
+
+Instructions for new xfstests testers:
+
+These instructions are customized for openSUSE/Ubuntu, but originally come from these 2 sources:
+
+http://xfs.org/index.php/Getting_the_latest_source_code
+http://www.how2forge.org/comment/reply/4443
+
+First you need to get xfstests running:
+
+First make sure you have the basic tools and packages
+
+$ zypper install git gcc libtool automake gettext-tools libattr-devel libacl-devel libuuid-devel btrfsprogs
+
+Then install the basic xfs sources:
+
+$ mkdir xfs_playground; cd xfs_playground
+$ git clone git://oss.sgi.com/xfs/cmds/xfsprogs
+$ git clone git://oss.sgi.com/xfs/cmds/xfstests
+
+*******************************************************************
+In order to run the tests related to snapshots you need to get the 
+test 256 and test 257 from the following repository : 
+
+https://github.com/adityadani/xfstests
+
+You can use the following command:
+
+git clone https://github.com/adityadani/xfstests
+
+If you are tracking the current version, use git pull 
+from time to time to get the latest work related to snapshots
+*******************************************************************
+
+
+$ cd xfsprogs
+$ make
+$ sudo make install-qa
+$ cd ../xfstests
+$ make
+
+Once the ‘make’ is successful you need to setup certain environment variables. 
+You need to have two different partitions on your machine : 
+1] One as a test device. 
+2] One as a scratch device. 
+(A scratch device is not mandatory. However certain tests need a scratch device.)
+
+Setting up the environment variables :
+
+export TEST_DEV=test_device-name
+export TEST_DIR=test_device-mount-point
+export SCRATCH_DEV=scratch_device-name
+export SCRATCH_MNT=scratch_device-mount-point
+export FSTYP=btrfs
+
+(Yes, the variable names are inconsistent. And assumes you are testing btrfs.)
+
+At a minimum, btrfs, xfs, and ext4 are supported by xfstests.
+
+Running Tests :
+
+$ cd xfstests
+$ ./check -g auto
+
+The above command by default runs many of the tests in the xfs test suite. 
+If you leave off the -g arg, it will try to run them all. There is also a 
+quick group (-g quick) that should run in under 5 minutes. See the file 
+"group" in the xfstests directory for a breakdown of which tests are in which group.
+
+
+In order to run a specific test say test no : 102 then,
+
+$ ./check 102
+$ ./check 001 002 003 ….
+
+(The check script tests the return value of each ‘test script’ and compares its
+
+value with the expected output. If the test fails then it generates a diff in the file .out.bad )
+
+Running Snapshot Tests :
+
+There are two tests related to snapshot testing viz:
+256
+257
+You will need to get tests 256,257 directly from the following link https://github.com/adityadani/xfstests
+
+In order to run the test : To run the tests both the devices/partitions need to be mounted.
+
+Both btrfs and ext4dev are supported currently.
+
+1] First set the environment variables as mentioned above.
+
+2] Mount the device on the specified mount point.
+
+mkfs.btrfs $TEST_DEV
+mkfs.btrfs $SCRATCH_DEV
+
+mount $TEST_DEV $TEST_DIR
+mount $SCRATCH_DEV $SCRATCH_MNT
+
+3] Run the test number 256
+
+$ ./check 256
+
+4] Run the test number 257
+
+$ ./check 257
+
+For any queries/doubts drop in an email to me at
+aditya.dani@gmail.com 
